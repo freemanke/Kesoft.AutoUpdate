@@ -17,7 +17,7 @@ namespace Kesoft.AutoUpdate
 {
     public partial class FormAutoUpdate : Form
     {
-        private string name;
+        private readonly string name;
         private Software[] infoes;
         private readonly string currentVersion;
 
@@ -42,6 +42,7 @@ namespace Kesoft.AutoUpdate
         {
             pbrCheck.Visible = true;
             btnCheck.Enabled = false;
+            btnDownload.Visible = false;
             lblMessage.Text = "正在检查更新信息...";
             try
             {
@@ -84,10 +85,13 @@ namespace Kesoft.AutoUpdate
         private async void btnDownload_Click(object sender, EventArgs e)
         {
             lblMessage.Text = "正在下载更新文件，请耐心等待...";
+            btnDownload.Enabled = false;
+            btnCheck.Enabled = false;
+            pbrCheck.Visible = true;
             try
             {
                 var info = infoes.First();
-                var fileName = info.DownloadUrl.Substring(info.DownloadUrl.LastIndexOf("/", StringComparison.Ordinal)+1);
+                var fileName = info.DownloadUrl.Substring(info.DownloadUrl.LastIndexOf("/", StringComparison.Ordinal) + 1);
                 var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 var filePath = Path.Combine(path, fileName);
                 if (!File.Exists(filePath))
@@ -107,10 +111,17 @@ namespace Kesoft.AutoUpdate
 
                 lblMessage.Text = "下载更新文件完成。";
                 Process.Start(new ProcessStartInfo {FileName = filePath,});
+                Close();
             }
             catch (Exception)
             {
                 lblMessage.Text = "下载更新文件失败，请稍后重试。";
+            }
+            finally
+            {
+                btnCheck.Enabled = true;
+                btnDownload.Enabled = true;
+                pbrCheck.Visible = false;
             }
         }
     }
